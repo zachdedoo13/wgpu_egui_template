@@ -1,23 +1,22 @@
 use wgpu::{Color, CommandEncoder, IndexFormat, RenderPipeline, TextureView};
-use wgpu::util::RenderEncoder;
 use crate::inbuilt::setup::Setup;
 use crate::inbuilt::vertex_library::{SQUARE_INDICES, SQUARE_VERTICES};
 use crate::inbuilt::vertex_package::{Vertex, VertexPackage};
+use crate::packages::camera_package::{CameraPackage};
 
 pub struct TestRenderPipeline {
    vertex_package: VertexPackage,
    render_pipeline: RenderPipeline,
 }
 impl TestRenderPipeline {
-   pub fn new(setup: &Setup) -> Self {
+   pub fn new(setup: &Setup, camera_package: &CameraPackage, ) -> Self {
       let vertex_package = VertexPackage::new(&setup.device, SQUARE_VERTICES, SQUARE_INDICES);
-
 
       // Render pipeline
       let render_pipeline_layout = setup.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
          label: Some("Render Pipeline Layout"),
          bind_group_layouts: &[
-
+            &camera_package.camera_bind_group_layout,
          ],
          push_constant_ranges: &[],
       });
@@ -76,7 +75,11 @@ impl TestRenderPipeline {
       }
    }
 
-   pub fn render_pass(&self, encoder: &mut CommandEncoder, view: &TextureView) {
+   pub fn render_pass(
+      &self, encoder: &mut CommandEncoder,
+      view: &TextureView,
+      camera_package: &CameraPackage,
+   ) {
       let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
          label: Some("Render Pass"),
          color_attachments: &[
@@ -103,6 +106,7 @@ impl TestRenderPipeline {
       render_pass.set_pipeline(&self.render_pipeline);
 
       // bind groups
+      render_pass.set_bind_group(0, &camera_package.camera_bind_group, &[]);
 
 
       render_pass.set_vertex_buffer(0, self.vertex_package.vertex_buffer.slice(..));

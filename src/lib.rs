@@ -4,14 +4,18 @@ pub mod egui {
    pub mod gui;
    pub mod gui_example;
 }
+
 pub mod inbuilt {
    pub mod setup;
    pub mod vertex_library;
    pub mod vertex_package;
    pub mod event_loop;
 }
+
 pub mod packages {
    pub mod time_package;
+   pub mod camera_package;
+   pub mod input_manager_package;
 }
 
 pub mod pipelines {

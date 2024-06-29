@@ -1,4 +1,5 @@
 use std::iter;
+use cgmath::{Vector3};
 use egui::Context;
 use egui_wgpu::ScreenDescriptor;
 use wgpu::{CommandEncoder, TextureView};
@@ -8,6 +9,8 @@ use winit::window::Window;
 use crate::egui::gui::EguiRenderer;
 use crate::egui::gui_example::gui;
 use crate::inbuilt::setup::Setup;
+use crate::packages::camera_package::{CameraPackage, OrthographicCamera};
+use crate::packages::input_manager_package::InputManager;
 use crate::packages::time_package::TimePackage;
 use crate::pipelines::test_render_pipeline::TestRenderPipeline;
 
@@ -18,9 +21,13 @@ pub struct State<'a> {
 
    // packages
    time_package: TimePackage,
+   camera_package: CameraPackage,
+   input_manager: InputManager,
 
    // pipelines
    test_render_pipeline: TestRenderPipeline,
+
+
 }
 
 impl<'a> State<'a> {
@@ -33,10 +40,18 @@ impl<'a> State<'a> {
 
       // packages
       let time_package = TimePackage::new();
+      let input_manager = InputManager::new();
+      let camera_package = CameraPackage::new(&setup.device, OrthographicCamera {
+         eye: (0.0, 0.0, 1.0).into(),
+         target: (0.0, 0.0, 0.0).into(),
+         up: Vector3::unit_y(),
+         aspect: setup.config.width as f32 / setup.config.height as f32,
+         zoom: 5.0,
+      });
 
 
       // pipelines
-      let test_render_pipeline = TestRenderPipeline::new(&setup);
+      let test_render_pipeline = TestRenderPipeline::new(&setup, &camera_package);
 
 
       Self {
@@ -44,6 +59,8 @@ impl<'a> State<'a> {
          egui,
 
          time_package,
+         camera_package,
+         input_manager,
 
          test_render_pipeline,
       }
@@ -56,25 +73,23 @@ impl<'a> State<'a> {
          self.setup.config.height = new_size.height;
          self.setup.surface.configure(&self.setup.device, &self.setup.config);
 
-         // self.camera_package.camera.aspect = self.setup.config.width as f32 / self.setup.config.height as f32
+         self.camera_package.camera.aspect = self.setup.config.width as f32 / self.setup.config.height as f32
       }
    }
 
    pub fn update_input(&mut self, event: &WindowEvent) -> bool {
-      // self.camera_package.camera_controller.process_events(event);
-
-      // match event {
-      //    WindowEvent::CursorMoved {position, ..} => {
-      //       self.mouse_pos = Vector2::new(position.x as f32, position.y as f32)
-      //    }
-      //
-      //    _ => {}
-      // }
-
+      self.input_manager.process_event(event);
       false
    }
 
-   pub fn update(&mut self) {}
+   pub fn update(&mut self) {
+      self.time_package.update();
+      self.camera_package.update(&mut self.setup.queue, self.time_package.delta_time as f32, &self.input_manager);
+
+      // let mouse_world_pos = self.input_manager.pull_world_pos_2d(&self.camera_package, &self.setup);
+
+      self.input_manager.reset();
+   }
 
    pub fn update_gui(&mut self, view: &TextureView, encoder: &mut CommandEncoder) {
       let screen_descriptor = ScreenDescriptor {
@@ -83,7 +98,10 @@ impl<'a> State<'a> {
       };
 
       let run_ui = |ui: &Context| {
-         gui(ui);
+         gui(
+            ui,
+            &self.time_package,
+         );
       };
 
       self.egui.draw(
@@ -106,7 +124,7 @@ impl<'a> State<'a> {
 
       // passes
       {
-         self.test_render_pipeline.render_pass(&mut encoder, &view);
+         self.test_render_pipeline.render_pass(&mut encoder, &view, &self.camera_package);
       }
 
       self.update_gui(&view, &mut encoder);

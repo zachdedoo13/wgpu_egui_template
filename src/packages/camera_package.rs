@@ -1,7 +1,7 @@
 use cgmath::{SquareMatrix, Transform, Vector2};
 use wgpu::{Device, Queue};
 use wgpu::util::DeviceExt;
-use winit::keyboard::KeyCode::{KeyX, KeyZ};
+use winit::keyboard::KeyCode::{KeyA, KeyD, KeyS, KeyW, KeyX, KeyZ};
 use crate::packages::input_manager_package::InputManager;
 
 pub struct OrthographicCamera {
@@ -60,8 +60,14 @@ impl OrthographicCameraController {
    }
 
    pub fn update_camera(&self, camera: &mut OrthographicCamera, delta_time: f32, input_manager: &InputManager) {
-      if input_manager.is_key_pressed(KeyZ) { camera.zoom *=  1.0 + self.speed * delta_time }
-      if input_manager.is_key_pressed(KeyX) { camera.zoom *= 1.0 - self.speed * delta_time }
+      if input_manager.is_key_pressed(KeyZ) { camera.zoom *=  self.speed + self.speed * delta_time }
+      if input_manager.is_key_pressed(KeyX) { camera.zoom *= self.speed - self.speed * delta_time }
+
+      if input_manager.is_key_pressed(KeyW) { camera.eye.y += self.speed * delta_time; camera.target.y += self.speed * delta_time }
+      if input_manager.is_key_pressed(KeyS) { camera.eye.y -= self.speed * delta_time; camera.target.y -= self.speed * delta_time }
+
+      if input_manager.is_key_pressed(KeyD) { camera.eye.x += self.speed * delta_time; camera.target.x += self.speed * delta_time }
+      if input_manager.is_key_pressed(KeyA) { camera.eye.x -= self.speed * delta_time; camera.target.x -= self.speed * delta_time }
    }
 
    pub fn screen_to_world_pos(

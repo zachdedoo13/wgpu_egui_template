@@ -1,10 +1,10 @@
 use crate::inbuilt::vertex_package::Vertex;
 
 pub const SQUARE_VERTICES: &[Vertex] = &[
-   Vertex { position: [0.5, 0.5, 0.0] }, // Vertex 0: top-right
-   Vertex { position: [-0.5, -0.5, 0.0] }, // Vertex 1: bottom-left
-   Vertex { position: [0.5, -0.5, 0.0] }, // Vertex 2: bottom-right
-   Vertex { position: [-0.5, 0.5, 0.0] }, // Vertex 3: top-left
+   Vertex { position: [1.0, 1.0, 0.0] }, // Vertex 0: top-right
+   Vertex { position: [-1.0, -1.0, 0.0] }, // Vertex 1: bottom-left
+   Vertex { position: [1.0, -1.0, 0.0] }, // Vertex 2: bottom-right
+   Vertex { position: [-1.0, 1.0, 0.0] }, // Vertex 3: top-left
 ];
 pub const SQUARE_INDICES: &[u16] = &[
    0, 1, 2,
@@ -12,14 +12,14 @@ pub const SQUARE_INDICES: &[u16] = &[
 ];
 
 pub const CUBE_VERTICES: &[Vertex] = &[
-   Vertex { position: [-0.5, -0.5, -0.5] }, // Vertex 0: bottom-left-back
-   Vertex { position: [0.5, -0.5, -0.5] },  // Vertex 1: bottom-right-back
-   Vertex { position: [0.5, 0.5, -0.5] },   // Vertex 2: top-right-back
-   Vertex { position: [-0.5, 0.5, -0.5] },  // Vertex 3: top-left-back
-   Vertex { position: [-0.5, -0.5, 0.5] },  // Vertex 4: bottom-left-front
-   Vertex { position: [0.5, -0.5, 0.5] },   // Vertex 5: bottom-right-front
-   Vertex { position: [0.5, 0.5, 0.5] },    // Vertex 6: top-right-front
-   Vertex { position: [-0.5, 0.5, 0.5] },   // Vertex 7: top-left-front
+   Vertex { position: [-1.0, -1.0, -1.0] }, // Vertex 0: bottom-left-back
+   Vertex { position: [1.0, -1.0, -1.0] },  // Vertex 1: bottom-right-back
+   Vertex { position: [1.0, 1.0, -1.0] },   // Vertex 2: top-right-back
+   Vertex { position: [-1.0, 1.0, -1.0] },  // Vertex 3: top-left-back
+   Vertex { position: [-1.0, -1.0, 1.0] },  // Vertex 4: bottom-left-front
+   Vertex { position: [1.0, -1.0, 1.0] },   // Vertex 5: bottom-right-front
+   Vertex { position: [1.0, 1.0, 1.0] },    // Vertex 6: top-right-front
+   Vertex { position: [-1.0, 1.0, 1.0] },   // Vertex 7: top-left-front
 ];
 
 pub const CUBE_INDICES: &[u16] = &[

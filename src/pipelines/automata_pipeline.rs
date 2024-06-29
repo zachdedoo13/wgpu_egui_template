@@ -2,26 +2,27 @@ use wgpu::{Color, CommandEncoder, IndexFormat, RenderPipeline, TextureView};
 use crate::inbuilt::setup::Setup;
 use crate::inbuilt::vertex_library::{SQUARE_INDICES, SQUARE_VERTICES};
 use crate::inbuilt::vertex_package::{Vertex, VertexPackage};
-use crate::packages::camera_package::{CameraPackage};
+use crate::packages::automata_package::AutomataPackage;
+use crate::packages::camera_package::CameraPackage;
 
-pub struct TestRenderPipeline {
+pub struct AutomataRenderPipeline {
    vertex_package: VertexPackage,
    render_pipeline: RenderPipeline,
 }
-impl TestRenderPipeline {
-   pub fn new(setup: &Setup, camera_package: &CameraPackage, ) -> Self {
+impl AutomataRenderPipeline {
+   pub fn new(setup: &Setup, camera_package: &CameraPackage, automata_package: &AutomataPackage) -> Self {
       let vertex_package = VertexPackage::new(&setup.device, SQUARE_VERTICES, SQUARE_INDICES);
 
-      // Render pipeline
       let render_pipeline_layout = setup.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
          label: Some("Render Pipeline Layout"),
          bind_group_layouts: &[
             &camera_package.camera_bind_group_layout,
+            &automata_package.bind_group_layout,
          ],
          push_constant_ranges: &[],
       });
 
-      let shader = setup.device.create_shader_module(wgpu::include_wgsl!("../shaders/render/test_render_pipeline.wgsl"));
+      let shader = setup.device.create_shader_module(wgpu::include_wgsl!("../shaders/render/automata_render.wgsl"));
 
       let render_pipeline = setup.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
          label: Some("Render Pipeline"),
@@ -76,9 +77,11 @@ impl TestRenderPipeline {
    }
 
    pub fn render_pass(
-      &self, encoder: &mut CommandEncoder,
+      &self,
+      encoder: &mut CommandEncoder,
       view: &TextureView,
       camera_package: &CameraPackage,
+      automata_package: &AutomataPackage
    ) {
       let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
          label: Some("Render Pass"),
@@ -89,9 +92,9 @@ impl TestRenderPipeline {
                resolve_target: None,
                ops: wgpu::Operations {
                   load: wgpu::LoadOp::Clear(Color {
-                     r: 0.0,
-                     g: 0.0,
-                     b: 0.0,
+                     r: 0.1,
+                     g: 0.1,
+                     b: 0.1,
                      a: 1.0,
                   }),
                   store: wgpu::StoreOp::Store,
@@ -105,9 +108,8 @@ impl TestRenderPipeline {
 
       render_pass.set_pipeline(&self.render_pipeline);
 
-      // bind groups
       render_pass.set_bind_group(0, &camera_package.camera_bind_group, &[]);
-
+      render_pass.set_bind_group(1, automata_package.bind_groups.pull_current(), &[]);
 
       render_pass.set_vertex_buffer(0, self.vertex_package.vertex_buffer.slice(..));
       render_pass.set_index_buffer(self.vertex_package.index_buffer.slice(..), IndexFormat::Uint16);

@@ -16,13 +16,18 @@ pub mod packages {
    pub mod time_package;
    pub mod camera_package;
    pub mod input_manager_package;
+   pub mod automata_package;
 }
+
 
 pub mod pipelines {
    pub mod test_render_pipeline;
+   pub mod automata_pipeline;
+   pub mod automata_compute_pipeline;
 }
 
 pub mod utility {
    pub mod macros;
    pub mod functions;
+   pub mod structs;
 }

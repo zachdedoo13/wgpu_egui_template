@@ -24,6 +24,7 @@ pub struct AutomataBundle {
    pub running: bool,
    pub generate_random: bool,
    pub update_rate: f64,
+   pub active_automata: Automata,
 
    tlsc: Instant,
 
@@ -35,13 +36,14 @@ impl AutomataBundle {
       setup: &Setup,
       camera_package: &CameraPackage,
    ) -> Self {
-      let target_size = Vector2::new(1028, 1028);
+      let target_size = Vector2::new(56, 56);
       let generate_random = true;
       let update_rate = 60.0;
+      let active_automata = Automata::SmoothLife;
 
       let automata_package = AutomataPackage::new(&setup, target_size.x, target_size.y, generate_random);
       let automata_render_pipeline = AutomataRenderPipeline::new(&setup, camera_package, &automata_package);
-      let automata_compute_pipeline = AutomataComputePipeline::new(&setup, &automata_package, Automata::GameOfLife);
+      let automata_compute_pipeline = AutomataComputePipeline::new(&setup, &automata_package, &active_automata);
       let queue_pipeline = QueueComputePipeline::new(&setup.device, &automata_package);
 
       Self {
@@ -53,6 +55,7 @@ impl AutomataBundle {
          target_size,
          generate_random,
          update_rate,
+         active_automata,
 
          tlsc: Instant::now(),
 
@@ -62,9 +65,6 @@ impl AutomataBundle {
    }
 
    pub fn update(&mut self, input_manager: &InputManager, setup: &Setup, camera_package: &CameraPackage) {
-
-
-
       if input_manager.is_mouse_key_just_pressed(MouseButton::Left) {
          let world_pos = input_manager.pull_world_pos_2d(camera_package, setup);
          let cube_pos_normal = Vector2::new(
@@ -76,7 +76,7 @@ impl AutomataBundle {
             (self.package.size.height as f32 * cube_pos_normal.y).ceil() as i32,
          );
 
-         self.queue_compute_pipeline.update_queue(setup, vec![[pix_pos.x, pix_pos.y, 1, 20]]);
+         self.queue_compute_pipeline.update_queue(setup, vec![[pix_pos.x, pix_pos.y, 2, 5]]);
 
          self.update_queued = true;
       } else { self.update_queued = false; }
@@ -93,6 +93,10 @@ impl AutomataBundle {
    pub fn reset_package(&mut self, setup: &Setup) {
       self.package = AutomataPackage::new(&setup, self.target_size.x, self.target_size.y, self.generate_random);
       self.package.bind_groups.ping_pong(); // needed or it breaks
+   }
+
+   pub fn reset_compute(&mut self, setup: &Setup) {
+      self.compute_pipeline = AutomataComputePipeline::new(&setup, &self.package, &self.active_automata);
    }
 
    pub fn automata_pass(

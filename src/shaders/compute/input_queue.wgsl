@@ -29,6 +29,39 @@ fn cs_main(
             }
         }
     }
+
+    if action.z == 2 /* circle */ {
+        let pos: vec2<i32> = action.xy;
+        let radius: i32 = action.w;
+        let x0: i32 = pos.x;
+        let y0: i32 = pos.y;
+
+        var x: i32 = radius;
+        var y: i32 = 0;
+        var err: i32 = 0;
+
+        while (x >= y) {
+            for (var i = -x; i <= x; i++) {
+                put(vec2(x0 + i, y0 + y), 1.0);
+                put(vec2(x0 + i, y0 - y), 1.0);
+            }
+
+            for (var i = -y; i <= y; i++) {
+                put(vec2(x0 + i, y0 + x), 1.0);
+                put(vec2(x0 + i, y0 - x), 1.0);
+            }
+
+            if (err <= 0) {
+                y += 1;
+                err += 2*y + 1;
+            }
+
+            if (err > 0) {
+                x -= 1;
+                err -= 2*x + 1;
+            }
+        }
+    }
 }
 
 fn pull(pos: vec2<i32>) -> f32 {

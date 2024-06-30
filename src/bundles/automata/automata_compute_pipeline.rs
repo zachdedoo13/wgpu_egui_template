@@ -6,7 +6,7 @@ use crate::inbuilt::setup::Setup;
 
 pub enum Automata {
    GameOfLife,
-   Test,
+   SmoothLife,
 }
 
 
@@ -14,10 +14,10 @@ pub struct AutomataComputePipeline {
    pub pipeline: ComputePipeline,
 }
 impl AutomataComputePipeline {
-   pub fn new(setup: &Setup, automata_package: &AutomataPackage, selected: Automata) -> Self {
+   pub fn new(setup: &Setup, automata_package: &AutomataPackage, selected: &Automata) -> Self {
       let shader = match selected {
          Automata::GameOfLife => include_str!("../../shaders/compute/game_of_life.wgsl"),
-         Automata::Test => include_str!("../../shaders/compute/game_of_life.wgsl"),
+         Automata::SmoothLife => include_str!("../../shaders/compute/smooth_life.wgsl"),
       };
 
       let cs_module = setup.device.create_shader_module(ShaderModuleDescriptor {

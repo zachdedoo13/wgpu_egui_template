@@ -1,5 +1,6 @@
 use egui::{Align2, Context, Ui};
 use crate::bundles::automata::automata_bundle::AutomataBundle;
+use crate::bundles::automata::automata_compute_pipeline::Automata;
 use crate::inbuilt::setup::Setup;
 use crate::packages::time_package::TimePackage;
 
@@ -25,6 +26,22 @@ pub fn gui(
 
       ui.add(egui::Checkbox::new(&mut automata_bundle.generate_random, "generate random"));
       ui.add(egui::Checkbox::new(&mut automata_bundle.running, "running"));
+
+
+      ui.add_space(20.0);
+      ui.add(egui::Label::new(format!("Active: {}", match automata_bundle.active_automata {
+         Automata::GameOfLife => {"Game Of Life"}
+         Automata::SmoothLife => {"Smooth Life"}
+      })));
+
+      if ui.add(egui::Button::new("Game Of Life")).clicked() {
+         automata_bundle.active_automata = Automata::GameOfLife;
+         automata_bundle.reset_compute(&setup);
+      }
+      if ui.add(egui::Button::new("Smooth Life")).clicked() {
+         automata_bundle.active_automata = Automata::SmoothLife;
+         automata_bundle.reset_compute(&setup);
+      }
 
 
       ui.end_row();

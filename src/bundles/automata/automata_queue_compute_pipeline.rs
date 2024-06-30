@@ -1,4 +1,3 @@
-use cgmath::Vector2;
 use wgpu::{
    BindGroup,
    BindGroupLayout,
@@ -34,10 +33,7 @@ impl QueueComputePipeline {
          source: wgpu::ShaderSource::Wgsl(include_str!("../../shaders/compute/input_queue.wgsl").into()),
       });
 
-      let middle = Vector2::new(automata_package.size.width / 2, automata_package.size.height / 2);
-      let mut input_data: Vec<[i32; 4]> = vec![[0, 0, 0, 0]; 100];
-      input_data[0] = [middle.x as i32, middle.y as i32, 1, 20];
-      input_data[1] = [0, 0, 1, 20];
+      let input_data: Vec<[i32; 4]> = vec![[0, 0, 0, 0]; 100];
 
       let input_array_layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
          label: None,

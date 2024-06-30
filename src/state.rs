@@ -9,7 +9,6 @@ use winit::window::Window;
 use crate::bundles::automata::automata_bundle::AutomataBundle;
 use crate::bundles::automata::automata_gui;
 use crate::egui::gui::EguiRenderer;
-use crate::egui::gui_example::gui;
 use crate::inbuilt::setup::Setup;
 use crate::packages::camera_package::{CameraPackage, OrthographicCamera};
 use crate::packages::input_manager_package::InputManager;

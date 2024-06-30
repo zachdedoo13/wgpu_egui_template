@@ -2,14 +2,27 @@ use wgpu::{CommandEncoder, ComputePipeline, ComputePipelineDescriptor, PipelineL
 use crate::bundles::automata::automata_package::AutomataPackage;
 use crate::inbuilt::setup::Setup;
 
+
+
+pub enum Automata {
+   GameOfLife,
+   Test,
+}
+
+
 pub struct AutomataComputePipeline {
    pub pipeline: ComputePipeline,
 }
 impl AutomataComputePipeline {
-   pub fn new(setup: &Setup, automata_package: &AutomataPackage) -> Self {
+   pub fn new(setup: &Setup, automata_package: &AutomataPackage, selected: Automata) -> Self {
+      let shader = match selected {
+         Automata::GameOfLife => include_str!("../../shaders/compute/game_of_life.wgsl"),
+         Automata::Test => include_str!("../../shaders/compute/game_of_life.wgsl"),
+      };
+
       let cs_module = setup.device.create_shader_module(ShaderModuleDescriptor {
          label: Some("compute_shader"),
-         source: wgpu::ShaderSource::Wgsl(include_str!("../../shaders/compute/game_of_life.wgsl").into()),
+         source: wgpu::ShaderSource::Wgsl(shader.into()),
       });
 
       let layout = setup.device.create_pipeline_layout(&PipelineLayoutDescriptor {

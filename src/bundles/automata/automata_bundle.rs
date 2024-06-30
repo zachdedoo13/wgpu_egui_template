@@ -1,11 +1,10 @@
-use std::thread::sleep;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 use cgmath::Vector2;
 use wgpu::{CommandEncoder, TextureView};
 use winit::event::MouseButton;
 use winit::keyboard::KeyCode;
-use winit::keyboard::KeyCode::{KeyB, KeyV};
-use crate::bundles::automata::automata_compute_pipeline::AutomataComputePipeline;
+use winit::keyboard::KeyCode::{KeyB};
+use crate::bundles::automata::automata_compute_pipeline::{Automata, AutomataComputePipeline};
 use crate::bundles::automata::automata_package::AutomataPackage;
 use crate::bundles::automata::automata_pipeline::AutomataRenderPipeline;
 use crate::bundles::automata::automata_queue_compute_pipeline::QueueComputePipeline;
@@ -42,7 +41,7 @@ impl AutomataBundle {
 
       let automata_package = AutomataPackage::new(&setup, target_size.x, target_size.y, generate_random);
       let automata_render_pipeline = AutomataRenderPipeline::new(&setup, camera_package, &automata_package);
-      let automata_compute_pipeline = AutomataComputePipeline::new(&setup, &automata_package);
+      let automata_compute_pipeline = AutomataComputePipeline::new(&setup, &automata_package, Automata::GameOfLife);
       let queue_pipeline = QueueComputePipeline::new(&setup.device, &automata_package);
 
       Self {

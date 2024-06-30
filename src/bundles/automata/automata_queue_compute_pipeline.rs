@@ -1,11 +1,26 @@
 use cgmath::Vector2;
-use wgpu::{BindGroup, BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType, Buffer, BufferBindingType, BufferSize, CommandEncoder, ComputePipeline, ComputePipelineDescriptor, Device, PipelineLayout, PipelineLayoutDescriptor, ShaderModuleDescriptor, ShaderStages};
-use wgpu::util::DeviceExt;
+use wgpu::{
+   BindGroup,
+   BindGroupLayout,
+   BindGroupLayoutDescriptor,
+   BindGroupLayoutEntry,
+   BindingType,
+   Buffer,
+   BufferBindingType,
+   BufferSize,
+   CommandEncoder,
+   ComputePipeline,
+   ComputePipelineDescriptor,
+   Device,
+   PipelineLayoutDescriptor,
+   ShaderModuleDescriptor,
+   ShaderStages,
+   util::DeviceExt
+};
 use crate::bundles::automata::automata_package::AutomataPackage;
 use crate::inbuilt::setup::Setup;
 
 pub struct QueueComputePipeline {
-   layout: PipelineLayout,
    pub pipeline: ComputePipeline,
    pub buffer: Buffer,
    pub input_data: Vec<[i32; 4]>,
@@ -76,7 +91,6 @@ impl QueueComputePipeline {
       });
 
       Self {
-         layout,
          pipeline,
 
          bind_group,

@@ -36,7 +36,9 @@ impl AutomataPackage {
       });
 
       if generate_random {
-         Self::write_texture_data(&setup, &texture_2, size, &Self::generate_random_data(size)); // the next one in the flipper must be written to
+         let random_data =  &Self::generate_random_data(size);
+         Self::write_texture_data(&setup, &texture_1, size, random_data); // the next one in the flipper must be written to
+         Self::write_texture_data(&setup, &texture_2, size, random_data); // the next one in the flipper must be written to
       }
 
       let view_1 = texture_1.create_view(&wgpu::TextureViewDescriptor::default());

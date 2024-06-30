@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use cgmath::Vector2;
-use winit::event::{ElementState, WindowEvent};
+use winit::event::{ElementState, MouseButton, WindowEvent};
 use winit::keyboard::{KeyCode, PhysicalKey};
 use crate::inbuilt::setup::Setup;
 use crate::packages::camera_package::CameraPackage;
@@ -8,6 +8,10 @@ use crate::packages::camera_package::CameraPackage;
 pub struct InputManager {
    currently_pressed: HashSet<KeyCode>,
    just_pressed: HashSet<KeyCode>,
+
+   mouse_currently_pressed: HashSet<MouseButton>,
+   mouse_just_pressed: HashSet<MouseButton>,
+
    pub mouse_screen_pos: Vector2<f32>,
 }
 impl InputManager {
@@ -16,10 +20,13 @@ impl InputManager {
          currently_pressed: HashSet::new(),
          just_pressed: HashSet::new(),
          mouse_screen_pos: Vector2::new(0.0, 0.0),
+         mouse_currently_pressed: HashSet::new(),
+         mouse_just_pressed: HashSet::new(),
       }
    }
 
    pub fn process_event(&mut self, event: &WindowEvent) {
+
       if let WindowEvent::KeyboardInput { event, .. } = event {
          match event.state {
             ElementState::Pressed => {
@@ -40,6 +47,18 @@ impl InputManager {
          self.mouse_screen_pos = Vector2::new(position.x as f32, position.y as f32)
       }
 
+      if let WindowEvent::MouseInput { button, state,  ..} = event {
+         match state {
+            ElementState::Pressed => {
+               self.mouse_currently_pressed.insert(*button);
+               self.mouse_just_pressed.insert(*button);
+            }
+            ElementState::Released => {
+               self.mouse_just_pressed.remove(button);
+            }
+         }
+      }
+
    }
 
    pub fn is_key_pressed(&self, key: KeyCode) -> bool {
@@ -48,6 +67,14 @@ impl InputManager {
 
    pub fn is_key_just_pressed(&self, key: KeyCode) -> bool {
       self.just_pressed.contains(&key)
+   }
+
+   pub fn is_mouse_key_pressed(&self, button: MouseButton) -> bool {
+      self.mouse_currently_pressed.contains(&button)
+   }
+
+   pub fn is_mouse_key_just_pressed(&self, button: MouseButton) -> bool {
+      self.mouse_just_pressed.contains(&button)
    }
 
    pub fn pull_world_pos_2d(&self, camera_package: &CameraPackage, setup: &Setup) -> Vector2<f32> {

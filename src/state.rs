@@ -7,6 +7,7 @@ use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
 use crate::bundles::automata::automata_bundle::AutomataBundle;
+use crate::bundles::automata::automata_gui;
 use crate::egui::gui::EguiRenderer;
 use crate::egui::gui_example::gui;
 use crate::inbuilt::setup::Setup;
@@ -52,7 +53,7 @@ impl<'a> State<'a> {
       });
 
 
-      let automata_bundle = AutomataBundle::new(&setup, &camera_package, 1000, 1000, false);
+      let automata_bundle = AutomataBundle::new(&setup, &camera_package);
 
 
       // pipelines
@@ -107,10 +108,12 @@ impl<'a> State<'a> {
       };
 
       let run_ui = |ui: &Context| {
-         gui(
+         automata_gui::gui(
             ui,
             &self.time_package,
-         );
+            &mut self.automata_bundle,
+            &self.setup,
+         )
       };
 
       self.egui.draw(
@@ -133,7 +136,7 @@ impl<'a> State<'a> {
 
 
       {
-         self.automata_bundle.automata_pass(&mut encoder, &view, &self.camera_package);
+         self.automata_bundle.automata_pass(&mut encoder, &view, &self.camera_package, &self.time_package);
       }
 
       self.update_gui(&view, &mut encoder);

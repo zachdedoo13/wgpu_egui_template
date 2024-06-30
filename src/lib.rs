@@ -18,7 +18,6 @@ pub mod packages {
    pub mod input_manager_package;
 }
 
-
 pub mod pipelines {
    pub mod test_render_pipeline;
 }
@@ -30,6 +29,7 @@ pub mod bundles {
       pub mod automata_compute_pipeline;
       pub mod automata_queue_compute_pipeline;
       pub mod automata_bundle;
+      pub mod automata_gui;
    }
 }
 

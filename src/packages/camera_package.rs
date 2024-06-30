@@ -63,11 +63,13 @@ impl OrthographicCameraController {
       if input_manager.is_key_pressed(KeyZ) { camera.zoom *=  self.speed + self.speed * delta_time }
       if input_manager.is_key_pressed(KeyX) { camera.zoom *= self.speed - self.speed * delta_time }
 
-      if input_manager.is_key_pressed(KeyW) { camera.eye.y += self.speed * delta_time; camera.target.y += self.speed * delta_time }
-      if input_manager.is_key_pressed(KeyS) { camera.eye.y -= self.speed * delta_time; camera.target.y -= self.speed * delta_time }
+      let mult = self.speed * (1. / camera.zoom) * delta_time;
 
-      if input_manager.is_key_pressed(KeyD) { camera.eye.x += self.speed * delta_time; camera.target.x += self.speed * delta_time }
-      if input_manager.is_key_pressed(KeyA) { camera.eye.x -= self.speed * delta_time; camera.target.x -= self.speed * delta_time }
+      if input_manager.is_key_pressed(KeyW) { camera.eye.y += mult ; camera.target.y += mult }
+      if input_manager.is_key_pressed(KeyS) { camera.eye.y -= mult; camera.target.y -= mult }
+
+      if input_manager.is_key_pressed(KeyD) { camera.eye.x += mult; camera.target.x += mult }
+      if input_manager.is_key_pressed(KeyA) { camera.eye.x -= mult; camera.target.x -= mult }
    }
 
    pub fn screen_to_world_pos(

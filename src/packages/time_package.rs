@@ -42,6 +42,7 @@ impl TimePackage {
 
       if self.last_data_dump.elapsed().as_secs_f64() > UPDATE_INTERVAL {
          self.calc_ave_fps();
+         self.last_data_dump = Instant::now();
       }
 
       self.timers.clear();

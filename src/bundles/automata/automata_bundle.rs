@@ -11,7 +11,7 @@ use crate::bundles::automata::automata_queue_compute_pipeline::QueueComputePipel
 use crate::inbuilt::setup::Setup;
 use crate::packages::camera_package::CameraPackage;
 use crate::packages::input_manager_package::InputManager;
-use crate::packages::time_package::TimePackage;
+use crate::packages::time_package::{TimePackage, Timer};
 
 
 pub struct AutomataBundle {
@@ -26,7 +26,8 @@ pub struct AutomataBundle {
    pub update_rate: f64,
    pub active_automata: Automata,
 
-   tlsc: Instant,
+   pub limit_compute_fps: bool,
+   time_since_last_compute_pass: Instant,
 
    update_queued: bool,
 
@@ -57,7 +58,8 @@ impl AutomataBundle {
          update_rate,
          active_automata,
 
-         tlsc: Instant::now(),
+         limit_compute_fps: true,
+         time_since_last_compute_pass: Instant::now(),
 
          update_queued: false,
          running: true
@@ -103,20 +105,40 @@ impl AutomataBundle {
       &mut self, encoder: &mut CommandEncoder,
       view: &TextureView,
       camera_package: &CameraPackage,
-      time_package: &TimePackage,
+      time_package: &mut TimePackage,
    ) {
       if self.update_queued { self.queue_compute_pipeline.compute_pass(encoder, &self.package); }
 
+      let mut render_timer = Timer::new("render pass");
       self.render_pipeline.render_pass(encoder, view, camera_package, &self.package);
+      render_timer.end();
 
-      if self.update_rate > 0.0 {
-         let target = 1.0 / self.update_rate;
-         let diff = target - time_package.delta_time;
+      time_package.add_timer(render_timer);
 
-         if self.tlsc.elapsed().as_secs_f64() > diff {
-            if self.running { self.compute_pipeline.compute_pass(encoder, &self.package); self.tlsc = Instant::now(); self.package.bind_groups.ping_pong(); }
+
+      let mut compute_timer = Timer::new("compute timer");
+      if self.limit_compute_fps {
+         if self.update_rate > 0.0 {
+            let target = 1.0 / self.update_rate;
+            let diff = target - time_package.delta_time;
+
+            if self.time_since_last_compute_pass.elapsed().as_secs_f64() > diff {
+               if self.running {
+                  self.compute_pipeline.compute_pass(encoder, &self.package);
+                  self.time_since_last_compute_pass = Instant::now();
+                  self.package.bind_groups.ping_pong();
+               }
+            }
          }
       }
+      else {
+         self.compute_pipeline.compute_pass(encoder, &self.package);
+         self.time_since_last_compute_pass = Instant::now();
+         self.package.bind_groups.ping_pong();
+      }
+
+      compute_timer.end();
+      time_package.add_timer(compute_timer);
 
    }
 }

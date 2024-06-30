@@ -8,7 +8,7 @@ pub fn gui(
 
    let code = | ui: &mut Ui |
    {
-      ui.add(egui::Label::new(format!("FPS: {}", time_package.fps as i32)));
+      ui.add(egui::Label::new(format!("FPS: {}", time_package.fps)));
 
       let mut test = 23.0;
       ui.add(egui::Slider::new(&mut test, 0.1..=1.0).text("test"));

@@ -13,14 +13,15 @@ pub fn gui(
 
    let code = | ui: &mut Ui |
    {
-      ui.add(egui::Label::new(format!("FPS: {}", time_package.fps as i32)));
+      ui.add(egui::Label::new(format!("FPS: {}", time_package.fps)));
 
       ui.add(egui::Slider::new(&mut automata_bundle.target_size.x, 1..=8192).text("size"));
       automata_bundle.target_size.y = automata_bundle.target_size.x;
 
+      ui.add(egui::Checkbox::new(&mut automata_bundle.limit_compute_fps, "limit compute fps"));
       ui.add(egui::Slider::new(&mut automata_bundle.update_rate, 5.0..=144.0).text("update rate ~fps"));
 
-      if ui.add(egui::Button::new("reset")).clicked() {
+      if ui.add(egui::Button::new("reset (space)")).clicked() {
          automata_bundle.reset_package(setup);
       }
 
@@ -43,6 +44,8 @@ pub fn gui(
          automata_bundle.reset_compute(&setup);
       }
 
+
+      time_package.display_timers(ui);
 
       ui.end_row();
    };

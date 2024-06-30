@@ -135,7 +135,7 @@ impl<'a> State<'a> {
 
 
       {
-         self.automata_bundle.automata_pass(&mut encoder, &view, &self.camera_package, &self.time_package);
+         self.automata_bundle.automata_pass(&mut encoder, &view, &self.camera_package, &mut self.time_package);
       }
 
       self.update_gui(&view, &mut encoder);

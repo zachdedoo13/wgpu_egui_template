@@ -1,64 +1,90 @@
-use std::time::{Instant};
+use std::time::{Duration, Instant};
+use egui::Ui;
 
 
 const UPDATE_INTERVAL: f64 = 0.5;
 const PAST_FPS_AMOUNT: usize = 10;
+const PAST_FPS_LIMIT: usize = 1000;
 
-#[allow(unused_variables)]
+
 pub struct TimePackage {
-   pub start_time: Instant,
-   pub fps: f64,
+   pub fps: i32,
    pub delta_time: f64,
-   pub past_fps: Vec<f64>,
+
+   start_time: Instant,
    last_frame: Instant,
    last_data_dump: Instant,
-   past_frames: Vec<f64>,
+   past_delta_times: Vec<f64>,
 
-   pub update_interval: f64,
-   pub past_fps_amount: usize,
+   timers: Vec<Timer>,
 }
 impl TimePackage {
    pub fn new() -> Self {
       Self {
+         fps: 0,
+         delta_time: 0.0,
+
          start_time: Instant::now(),
          last_frame: Instant::now(),
          last_data_dump: Instant::now(),
-         fps: 0.0,
-         past_frames: vec![],
-         past_fps: vec![],
-         delta_time: 0.0,
+         past_delta_times: vec![],
 
-         update_interval: UPDATE_INTERVAL,
-         past_fps_amount: PAST_FPS_AMOUNT,
+         timers: vec![],
       }
    }
 
    pub fn update(&mut self) {
-      if self.last_data_dump.elapsed().as_secs_f64() > self.update_interval {
-         self.last_data_dump = Instant::now();
-         self.calc_ave_fps();
-         self.past_fps.push(self.fps);
-         if self.past_fps.len() > self.past_fps_amount {
-            let diff = self.past_fps.len() - self.past_fps_amount;
-            for _ in 0..diff {
-               self.past_fps.remove(0);
-            }
-         };
+      self.delta_time = self.last_frame.elapsed().as_secs_f64();
 
-         // println!("{}", self.fps);
+      if self.past_delta_times.len() < PAST_FPS_LIMIT {
+         self.past_delta_times.push(self.delta_time);
       }
 
-      self.delta_time = self.last_frame.elapsed().as_secs_f64();
-      self.past_frames.push(self.delta_time);
+      if self.last_data_dump.elapsed().as_secs_f64() > UPDATE_INTERVAL {
+         self.calc_ave_fps();
+      }
+
+      self.timers.clear();
       self.last_frame = Instant::now();
+   }
+
+   pub fn add_timer(&mut self, timer: Timer) {
+      self.timers.push(timer);
+   }
+
+   pub fn display_timers(&self, ui: &mut Ui) {
+      for timer in self.timers.iter() {
+         ui.add(egui::Label::new(format!("{}: {:?}", timer.label, timer.elapsed)));
+      }
    }
 
    fn calc_ave_fps(&mut self) {
       let mut total = 0.0;
-      for num in &self.past_frames {
+      for num in &self.past_delta_times {
          total += num;
       }
-      self.fps = 1.0 / (total / self.past_frames.len() as f64);
-      self.past_frames.clear();
+      self.fps = (1.0 / (total / self.past_delta_times.len() as f64)) as i32;
+      self.past_delta_times.clear();
+   }
+}
+
+
+pub struct Timer {
+   st: Instant,
+   elapsed: Option<Duration>,
+   label: &'static str,
+}
+
+impl Timer {
+   pub fn new(label: &'static str) -> Self {
+      Self {
+         label,
+         elapsed: None,
+         st: Instant::now(),
+      }
+   }
+
+   pub fn end(&mut self) {
+      self.elapsed = Some(self.st.elapsed());
    }
 }

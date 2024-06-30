@@ -1,8 +1,8 @@
 use wgpu::{Color, CommandEncoder, IndexFormat, RenderPipeline, TextureView};
+use crate::bundles::automata::automata_package::AutomataPackage;
 use crate::inbuilt::setup::Setup;
 use crate::inbuilt::vertex_library::{SQUARE_INDICES, SQUARE_VERTICES};
 use crate::inbuilt::vertex_package::{Vertex, VertexPackage};
-use crate::packages::automata_package::AutomataPackage;
 use crate::packages::camera_package::CameraPackage;
 
 pub struct AutomataRenderPipeline {
@@ -22,7 +22,7 @@ impl AutomataRenderPipeline {
          push_constant_ranges: &[],
       });
 
-      let shader = setup.device.create_shader_module(wgpu::include_wgsl!("../shaders/render/automata_render.wgsl"));
+      let shader = setup.device.create_shader_module(wgpu::include_wgsl!("../../shaders/render/automata_render.wgsl"));
 
       let render_pipeline = setup.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
          label: Some("Render Pipeline"),

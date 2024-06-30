@@ -6,15 +6,13 @@ use wgpu::{CommandEncoder, TextureView};
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
+use crate::bundles::automata::automata_bundle::AutomataBundle;
 use crate::egui::gui::EguiRenderer;
 use crate::egui::gui_example::gui;
 use crate::inbuilt::setup::Setup;
-use crate::packages::automata_package::AutomataPackage;
 use crate::packages::camera_package::{CameraPackage, OrthographicCamera};
 use crate::packages::input_manager_package::InputManager;
 use crate::packages::time_package::TimePackage;
-use crate::pipelines::automata_compute_pipeline::AutomataComputePipeline;
-use crate::pipelines::automata_pipeline::AutomataRenderPipeline;
 use crate::pipelines::test_render_pipeline::TestRenderPipeline;
 
 
@@ -27,9 +25,7 @@ pub struct State<'a> {
    camera_package: CameraPackage,
    input_manager: InputManager,
 
-   automata_package: AutomataPackage,
-   automata_render_pipeline: AutomataRenderPipeline,
-   automata_compute_pipeline: AutomataComputePipeline,
+   automata_bundle: AutomataBundle,
 
    // pipelines
    #[allow(dead_code)]
@@ -56,9 +52,7 @@ impl<'a> State<'a> {
       });
 
 
-      let automata_package = AutomataPackage::new(&setup, 86, 86);
-      let automata_render_pipeline = AutomataRenderPipeline::new(&setup, &camera_package, &automata_package);
-      let automata_compute_pipeline = AutomataComputePipeline::new(&setup, &automata_package);
+      let automata_bundle = AutomataBundle::new(&setup, &camera_package, 1000, 1000, false);
 
 
       // pipelines
@@ -76,9 +70,7 @@ impl<'a> State<'a> {
          test_render_pipeline,
 
 
-         automata_package,
-         automata_render_pipeline,
-         automata_compute_pipeline,
+         automata_bundle,
       }
    }
 
@@ -103,7 +95,7 @@ impl<'a> State<'a> {
       self.camera_package.update(&mut self.setup.queue, self.time_package.delta_time as f32, &self.input_manager);
 
       // let mouse_world_pos = self.input_manager.pull_world_pos_2d(&self.camera_package, &self.setup);
-      self.automata_package.bind_groups.ping_pong();
+      self.automata_bundle.update(&self.input_manager, &self.setup, &self.camera_package);
 
       self.input_manager.reset();
    }
@@ -140,14 +132,8 @@ impl<'a> State<'a> {
       });
 
 
-      // compute passes
       {
-         self.automata_compute_pipeline.compute_pass(&mut encoder, &self.automata_package);
-      }
-
-      // render passes
-      {
-         self.automata_render_pipeline.render_pass(&mut encoder, &view, &self.camera_package, &self.automata_package);
+         self.automata_bundle.automata_pass(&mut encoder, &view, &self.camera_package);
       }
 
       self.update_gui(&view, &mut encoder);

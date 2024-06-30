@@ -50,7 +50,7 @@ impl InputManager {
       self.just_pressed.contains(&key)
    }
 
-   pub fn pull_world_pos_2d(&mut self, camera_package: &CameraPackage, setup: &Setup) -> Vector2<f32> {
+   pub fn pull_world_pos_2d(&self, camera_package: &CameraPackage, setup: &Setup) -> Vector2<f32> {
       let screen_size = setup.window.inner_size();
 
       camera_package.camera_controller.screen_to_world_pos(

@@ -11,7 +11,7 @@ pub struct AutomataPackage {
    pub bind_groups: PingPongData<BindGroup>,
 }
 impl AutomataPackage {
-   pub fn new(setup: &Setup, width: u32, height: u32) -> Self {
+   pub fn new(setup: &Setup, width: u32, height: u32, generate_random: bool) -> Self {
       let size = Extent3d { width, height, depth_or_array_layers: 1, };
 
       let texture_1 = setup.device.create_texture(&TextureDescriptor {
@@ -35,8 +35,9 @@ impl AutomataPackage {
          view_formats: &[],
       });
 
-      Self::write_texture_data(&setup, &texture_1, size, &Self::generate_random_data(size)); // the first one in the flipper must be written to
-      Self::write_texture_data(&setup, &texture_2, size, &Self::generate_random_data(size));
+      if generate_random {
+         Self::write_texture_data(&setup, &texture_2, size, &Self::generate_random_data(size)); // the next one in the flipper must be written to
+      }
 
       let view_1 = texture_1.create_view(&wgpu::TextureViewDescriptor::default());
       let view_2 = texture_2.create_view(&wgpu::TextureViewDescriptor::default());
@@ -114,7 +115,7 @@ impl AutomataPackage {
       }
    }
 
-   fn write_texture_data(setup: &Setup, texture: &Texture, size: Extent3d, data: &Vec<Texel> ) {
+   pub fn write_texture_data(setup: &Setup, texture: &Texture, size: Extent3d, data: &Vec<Texel> ) {
       let bytes_per_pixel = std::mem::size_of::<Texel>();
       let bytes_per_row = (size.width as usize * bytes_per_pixel) as u32;
       let rows_per_image = size.height;
@@ -137,7 +138,7 @@ impl AutomataPackage {
 
    }
 
-   fn generate_random_data( size: Extent3d) -> Vec<Texel> {
+   pub fn generate_random_data( size: Extent3d) -> Vec<Texel> {
       let mut rng = thread_rng();
       let mut test_data = vec![];
       for _ in 0..(size.width * size.height) {

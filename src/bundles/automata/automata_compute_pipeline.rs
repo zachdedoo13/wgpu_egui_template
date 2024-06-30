@@ -1,6 +1,6 @@
 use wgpu::{CommandEncoder, ComputePipeline, ComputePipelineDescriptor, PipelineLayoutDescriptor, ShaderModuleDescriptor};
+use crate::bundles::automata::automata_package::AutomataPackage;
 use crate::inbuilt::setup::Setup;
-use crate::packages::automata_package::AutomataPackage;
 
 pub struct AutomataComputePipeline {
    pub pipeline: ComputePipeline,
@@ -9,7 +9,7 @@ impl AutomataComputePipeline {
    pub fn new(setup: &Setup, automata_package: &AutomataPackage) -> Self {
       let cs_module = setup.device.create_shader_module(ShaderModuleDescriptor {
          label: Some("compute_shader"),
-         source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/compute/game_of_life.wgsl").into()),
+         source: wgpu::ShaderSource::Wgsl(include_str!("../../shaders/compute/game_of_life.wgsl").into()),
       });
 
       let layout = setup.device.create_pipeline_layout(&PipelineLayoutDescriptor {

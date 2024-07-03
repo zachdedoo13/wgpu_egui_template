@@ -36,7 +36,7 @@ impl AutomataPackage {
       });
 
       if generate_random {
-         let random_data =  &Self::generate_random_data(size);
+         let random_data =  &Self::generate_random_data_0_to_1(size);
          Self::write_texture_data(&setup, &texture_1, size, random_data); // the next one in the flipper must be written to
          Self::write_texture_data(&setup, &texture_2, size, random_data); // the next one in the flipper must be written to
       }
@@ -140,7 +140,7 @@ impl AutomataPackage {
 
    }
 
-   pub fn generate_random_data( size: Extent3d) -> Vec<Texel> {
+   pub fn generate_random_data_0_to_1(size: Extent3d) -> Vec<Texel> {
       let mut rng = thread_rng();
       let mut test_data = vec![];
       for _ in 0..(size.width * size.height) {

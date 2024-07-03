@@ -32,49 +32,42 @@ fn put(pos: vec2<i32>, val: f32) {
 
 // game of life
 fn game_of_life(uv: vec2<i32>) {
-    let nearby = count_directly_nearby(uv);
+    let nearby = count_directly_nearby(uv, 1);
 
     let alive = 1.0;
     let dead = 0.0;
+
+    let lower = 2;
+    let upper = 3;
+
+    let live_lower = 3;
+    let live_upper = 3;
 
     // dead alive threshold
     let dat = 0.5;
 
     // enshore all conditions are accounted for
     if pull(uv) > dat {
-        if nearby < 2 || nearby > 3 { put(uv, dead); }
+        if nearby < lower || nearby > upper { put(uv, dead); }
         else { put(uv, alive); }
     }
     else {
-        if nearby == 3 { put(uv, alive); }
+        if nearby >= live_lower && nearby <= live_upper { put(uv, alive); }
         else { put(uv, dead); }
     }
 }
 
-fn count_directly_nearby(uv: vec2<i32>) -> i32 {
+fn count_directly_nearby(uv: vec2<i32>, range: i32) -> i32 {
     var count = 0;
-
     let dat = 0.5;
 
-    // Top-left neighbor
-    if pull(vec2(uv.x - 1, uv.y + 1)) > dat { count += 1; };
-    // Top neighbor
-    if pull(vec2(uv.x, uv.y + 1)) > dat { count += 1; };
-    // Top-right neighbor
-    if pull(vec2(uv.x + 1, uv.y + 1)) > dat { count += 1; };
-
-    // Left neighbor
-    if pull(vec2(uv.x - 1, uv.y)) > dat { count += 1; };
-    // Right neighbor
-    if pull(vec2(uv.x + 1, uv.y)) > dat { count += 1; };
-
-    // Bottom-left neighbor
-    if pull(vec2(uv.x - 1, uv.y - 1)) > dat { count += 1; };
-    // Bottom neighbor
-    if pull(vec2(uv.x, uv.y - 1)) > dat { count += 1; };
-    // Bottom-right neighbor
-    if pull(vec2(uv.x + 1, uv.y - 1)) > dat { count += 1; };
-
+    for (var dx: i32 = -range; dx <= range; dx++) {
+        for (var dy: i32 = -range; dy <= range; dy++) {
+            if dx == 0 && dy == 0 { continue; } // Skip the cell itself
+            let value = pull(vec2(uv.x + dx, uv.y + dy));
+            if value > dat { count += 1; };
+        }
+    }
 
     return count;
 }

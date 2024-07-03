@@ -28,6 +28,12 @@ pub fn gui(
       ui.add(egui::Checkbox::new(&mut automata_bundle.generate_random, "generate random"));
       ui.add(egui::Checkbox::new(&mut automata_bundle.running, "running"));
 
+      ui.add_space(20.0);
+      ui.add(egui::Label::new("Brush settings"));
+      ui.add(egui::Slider::new(&mut automata_bundle.brush_size, 1..=600
+      ).text("size"));
+      ui.add(egui::Slider::new(&mut automata_bundle.brush_type, 1..=4).text("type"));
+
 
       ui.add_space(20.0);
       ui.add(egui::Label::new(format!("Active: {}", match automata_bundle.active_automata {

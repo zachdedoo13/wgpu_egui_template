@@ -29,8 +29,17 @@ fn cs_main(
             }
         }
     }
+    else if action.z == -1 /* remove square */ {
+            for (var i = 0; i < action.w; i++) {
+                for (var j = 0; j < action.w; j++) {
+                    let x = (action.x - action.w / 2) + i;
+                    let y = (action.y - action.w / 2) + j;
+                    put(vec2(x, y), 0.0);
+                }
+            }
+        }
 
-    if action.z == 2 /* circle */ {
+    else if action.z == 2 /* circle */ {
         let pos: vec2<i32> = action.xy;
         let radius: i32 = action.w;
         let x0: i32 = pos.x;
@@ -62,6 +71,97 @@ fn cs_main(
             }
         }
     }
+    else if action.z == -2 /* remove circle */ {
+        let pos: vec2<i32> = action.xy;
+        let radius: i32 = action.w;
+        let x0: i32 = pos.x;
+        let y0: i32 = pos.y;
+
+        var x: i32 = radius;
+        var y: i32 = 0;
+        var err: i32 = 0;
+
+        while (x >= y) {
+            for (var i = -x; i <= x; i++) {
+                put(vec2(x0 + i, y0 + y), 0.0);
+                put(vec2(x0 + i, y0 - y), 0.0);
+            }
+
+            for (var i = -y; i <= y; i++) {
+                put(vec2(x0 + i, y0 + x), 0.0);
+                put(vec2(x0 + i, y0 - x), 0.0);
+            }
+
+            if (err <= 0) {
+                y += 1;
+                err += 2*y + 1;
+            }
+
+            if (err > 0) {
+                x -= 1;
+                err -= 2*x + 1;
+            }
+        }
+    }
+
+    else if action.z == 3 /* square grid */ {
+        var counter = 0;
+        for (var i = 0; i < action.w; i++) {
+            if action.w % 2 == 0 { counter += 1; }
+            for (var j = 0; j < action.w; j++) {
+                counter += 1;
+                if counter % 2 == 0 { continue; }
+
+                let x = (action.x - action.w / 2) + i;
+                let y = (action.y - action.w / 2) + j;
+                put(vec2(x, y), 1.0);
+            }
+        }
+    }
+    else if action.z == -3 /* remove square grid */ {
+            var counter = 0;
+            for (var i = 0; i < action.w; i++) {
+                if action.w % 2 == 0 { counter += 1; }
+                for (var j = 0; j < action.w; j++) {
+                    counter += 1;
+                    if counter % 2 == 0 { continue; }
+
+                    let x = (action.x - action.w / 2) + i;
+                    let y = (action.y - action.w / 2) + j;
+                    put(vec2(x, y), 0.0);
+                }
+            }
+        }
+
+    else if action.z == 4 /* sparce square grid */ {
+        var counter = 0;
+        var flipper = false;
+        for (var i = 0; i < action.w; i++) {
+            if action.w % 2 == 0 { counter += 1; }
+            for (var j = 0; j < action.w; j++) {
+                counter += 1;
+                if counter % 2 == 0 { continue; }
+
+                flipper = !flipper;
+                if flipper { continue; }
+
+                let x = (action.x - action.w / 2) + i;
+                let y = (action.y - action.w / 2) + j;
+                put(vec2(x, y), 1.0);
+            }
+        }
+    }
+    else if action.z == -4 /* remove square */ {
+        for (var i = 0; i < action.w; i++) {
+            for (var j = 0; j < action.w; j++) {
+                let x = (action.x - action.w / 2) + i;
+                let y = (action.y - action.w / 2) + j;
+                put(vec2(x, y), 0.0);
+            }
+        }
+        }
+
+
 }
 
 fn pull(pos: vec2<i32>) -> f32 {

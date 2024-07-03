@@ -12,6 +12,7 @@ fn cs_main(
 ) {
     let uv = vec2<i32>(i32(global_id.x), i32(global_id.y));
 
+    // get area
 
 }
 
@@ -22,4 +23,3 @@ fn pull(pos: vec2<i32>) -> f32 {
 fn put(pos: vec2<i32>, val: f32) {
     textureStore(write_texture, pos, vec4<f32>(val, 0.0, 0.0, 1.0));
 }
-

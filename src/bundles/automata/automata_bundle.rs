@@ -31,6 +31,8 @@ pub struct AutomataBundle {
 
    update_queued: bool,
 
+   pub brush_type: i32,
+   pub brush_size: i32,
 }
 impl AutomataBundle {
    pub fn new(
@@ -40,7 +42,10 @@ impl AutomataBundle {
       let target_size = Vector2::new(56, 56);
       let generate_random = true;
       let update_rate = 60.0;
-      let active_automata = Automata::SmoothLife;
+      let active_automata = Automata::GameOfLife;
+
+      let brush_type = 1;
+      let brush_size = 5;
 
       let automata_package = AutomataPackage::new(&setup, target_size.x, target_size.y, generate_random);
       let automata_render_pipeline = AutomataRenderPipeline::new(&setup, camera_package, &automata_package);
@@ -57,6 +62,8 @@ impl AutomataBundle {
          generate_random,
          update_rate,
          active_automata,
+         brush_type,
+         brush_size,
 
          limit_compute_fps: true,
          time_since_last_compute_pass: Instant::now(),
@@ -68,20 +75,20 @@ impl AutomataBundle {
 
    pub fn update(&mut self, input_manager: &InputManager, setup: &Setup, camera_package: &CameraPackage) {
       if input_manager.is_mouse_key_just_pressed(MouseButton::Left) {
-         let world_pos = input_manager.pull_world_pos_2d(camera_package, setup);
-         let cube_pos_normal = Vector2::new(
-            (world_pos.x + 1.0) / 2.0,
-            (world_pos.y + 1.0) / 2.0,
-         );
-         let pix_pos = Vector2::new(
-            (self.package.size.width as f32 * cube_pos_normal.x).ceil() as i32,
-            (self.package.size.height as f32 * cube_pos_normal.y).ceil() as i32,
-         );
+         let pix_pos = self.get_pix_pos(input_manager, camera_package, setup);
 
-         self.queue_compute_pipeline.update_queue(setup, vec![[pix_pos.x, pix_pos.y, 2, 5]]);
+         self.queue_compute_pipeline.update_queue(setup, vec![[pix_pos.x, pix_pos.y, self.brush_type, self.brush_size]]);
 
          self.update_queued = true;
-      } else { self.update_queued = false; }
+      }
+      else if input_manager.is_mouse_key_just_pressed(MouseButton::Right) {
+         let pix_pos = self.get_pix_pos(input_manager, camera_package, setup);
+
+         self.queue_compute_pipeline.update_queue(setup, vec![[pix_pos.x, pix_pos.y, -self.brush_type, self.brush_size]]);
+
+         self.update_queued = true;
+      }
+      else { self.update_queued = false; }
 
       if input_manager.is_key_pressed(KeyB) {
          self.running = !self.running;
@@ -90,6 +97,24 @@ impl AutomataBundle {
       if input_manager.is_key_just_pressed(KeyCode::Space) {
          self.reset_package(setup);
       }
+   }
+
+   fn get_pix_pos(&self, input_manager: &InputManager, camera_package: &CameraPackage, setup: &Setup) -> Vector2<i32> {
+      let world_pos = input_manager.pull_world_pos_2d(camera_package, setup);
+      let cube_pos_normal = Vector2::new(
+         (world_pos.x + 1.0) / 2.0,
+         (world_pos.y + 1.0) / 2.0,
+      );
+
+      if cube_pos_normal.x > 1.0 || cube_pos_normal.x < 0.0 {return Vector2::new(i32::MAX, i32::MAX)}
+      else if cube_pos_normal.y > 1.0 || cube_pos_normal.y < 0.0 {return Vector2::new(i32::MAX, i32::MAX)}
+
+      let pix_pos = Vector2::new(
+         (self.package.size.width as f32 * cube_pos_normal.x).ceil() as i32 -1,
+         (self.package.size.height as f32 * cube_pos_normal.y).ceil() as i32 -1,
+      );
+
+      pix_pos
    }
 
    pub fn reset_package(&mut self, setup: &Setup) {
@@ -109,14 +134,8 @@ impl AutomataBundle {
    ) {
       if self.update_queued { self.queue_compute_pipeline.compute_pass(encoder, &self.package); }
 
-      let mut render_timer = Timer::new("render pass");
       self.render_pipeline.render_pass(encoder, view, camera_package, &self.package);
-      render_timer.end();
 
-      time_package.add_timer(render_timer);
-
-
-      let mut compute_timer = Timer::new("compute timer");
       if self.limit_compute_fps {
          if self.update_rate > 0.0 {
             let target = 1.0 / self.update_rate;
@@ -137,8 +156,6 @@ impl AutomataBundle {
          self.package.bind_groups.ping_pong();
       }
 
-      compute_timer.end();
-      time_package.add_timer(compute_timer);
 
    }
 }
